@@ -1,5 +1,12 @@
 #! /usr/bin/env python
 
+# todo
+#  - store tuples in the queue to store relarive path alongside absolute path
+#  - derive decent list of files
+#  - rsynch support
+#  - hook into s3fs
+
+
 # should imports go at the top of a file as a good convention?
 # doesnt seem very 'pythonic'
 import glob, threading, Queue, sys, shutil, time, os.path
@@ -21,9 +28,9 @@ class Worker(threading.Thread):
                 continue
             print '{}: {}'.format(self.name, source)
             try:
-                shutil.copy2(source,'/temp/backup_test/')
-            except IOError as e:
+                #shutil.copy2(source,'/temp/backup_test/')
                 a=1
+            except IOError as e:
                 print '   ... Skipping: {}'.format(e)
             self._q.task_done()
 
@@ -49,11 +56,21 @@ class Producer(object):
             for line in backupListFile:
                 # remove trailing carriage return
                 line = line.rstrip()
-                # resolves wildchars in the path
-                resolvedPaths = glob.glob(line)
-                print resolvedPaths
-                for path in resolvedPaths:
-                    self.putWithRetry(path, q)
+                self.processLine(line, q)
+    def processLine(self, line, q):
+        # resolves wildchars in the path
+        resolvedPaths = glob.glob(line)
+        for path in resolvedPaths:
+            if os.path.isdir(path):
+                os.path.walk(path, self.processDir, q)
+            else:
+                self.putWithRetry(path, q)
+    def processDir(self, q, dirname, names):
+        for f in names:
+            fqPath = os.path.join(dirname, f)
+            if os.path.isdir(fqPath):
+                continue
+            self.putWithRetry(fqPath, q)
     def putWithRetry(self, path, q):
         while True:
             try:
@@ -63,7 +80,7 @@ class Producer(object):
                 a=1
 
 #time.sleep(1)
-queueSize=2
+queueSize=1000
 # create a FIFO queue to put file paths into
 q = Queue.Queue(queueSize)
 # create N worker threads to consume the queue
