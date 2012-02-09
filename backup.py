@@ -62,12 +62,15 @@ class Producer(object):
         resolvedPaths = glob.glob(line)
         for path in resolvedPaths:
             if os.path.isdir(path):
-                os.path.walk(path, self.processDir, q)
+                os.path.walk(path, self.processDir, (q, path))
             else:
                 self.putWithRetry(path, q)
-    def processDir(self, q, dirname, names):
+    def processDir(self, (q,origPath), dirname, names):
+        (root,basename) = os.path.split(origPath)
+        relDir = os.path.relpath(dirname, root)
         for f in names:
             fqPath = os.path.join(dirname, f)
+            print 'Got {}, {}'.format(relDir, fqPath)
             if os.path.isdir(fqPath):
                 continue
             self.putWithRetry(fqPath, q)
