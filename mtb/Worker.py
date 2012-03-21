@@ -1,4 +1,5 @@
 import glob, threading, Queue, sys, shutil, time, os.path
+from subprocess import call
 
 
 class Worker(threading.Thread):
@@ -33,7 +34,8 @@ class Worker(threading.Thread):
                         raise
             print '{}: Copying from {} to {}'.format(self.name, srcFile, destFile)
             try:
-                shutil.copy2(srcFile, destFile)
+                #shutil.copy2(srcFile, destFile)
+                call(["/usr/bin/rsync", srcFile, destFile])
                 a=1
             except IOError as e:
                 print '   ... Skipping: {}'.format(e)
