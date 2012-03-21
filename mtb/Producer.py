@@ -8,7 +8,7 @@ class Producer(object):
     def start(self):
         # create N worker threads to consume the queue
         self.startWorkers(self.noThreads, self._q)
-        self.readFilesFile('files.txt', self._q)
+        self.readFilesFile(os.path.expanduser('~/.mtb'), self._q)
         self.waitForEnd(self._q)
     def waitForEnd(self, q):
         while q.empty() != True:
