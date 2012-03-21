@@ -35,8 +35,13 @@ class Worker(threading.Thread):
             print '{}: Copying from {} to {}'.format(self.name, srcFile, destFile)
             try:
                 #shutil.copy2(srcFile, destFile)
-                call(["/usr/bin/rsync", srcFile, destFile])
-                a=1
+                # rsync options explained:
+                #   t: preserves and check mtime of files and only transfers out of date files
+                #   l: preserves symlinks
+                #   p: preserve permissions
+                #   g: preserve group
+                #   o: preserve owner
+                call(['/usr/bin/rsync', '-tlpgo', srcFile, destFile])
             except IOError as e:
                 print '   ... Skipping: {}'.format(e)
             self._q.task_done()
