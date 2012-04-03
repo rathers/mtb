@@ -24,3 +24,7 @@ It isnt finished yet! Use at your peril! :)
 Also this is my fist foray into python so please excuse any tardiness and anti-pythonic behaviours!
 
 ## Usage
+
+## Performance
+
+https://docs.google.com/spreadsheet/ccc?key=0AnGF7GAs4sjAdGV4VjJ6VjlqZllwYXkwQkxrbnlxb3c
