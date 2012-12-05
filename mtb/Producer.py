@@ -2,21 +2,22 @@ import glob, threading, Queue, sys, shutil, time, os.path, logging
 from mtb.Worker import Worker
 
 class Producer(object):
-    noThreads = 1
-    def __init__(self, q):
+    noThreads = 10
+    def __init__(self, q, log):
         self._q = q
+        self.log = log
     def start(self):
         # create N worker threads to consume the queue
-        self.startWorkers(self.noThreads, self._q)
+        self.startWorkers(self.noThreads, self._q, self.log)
         self.readFilesFile(os.path.expanduser('~/.mtb'), self._q)
         self.waitForEnd(self._q)
     def waitForEnd(self, q):
         while q.empty() != True:
             time.sleep(1)
         q.join()
-    def startWorkers(self, count, q):
+    def startWorkers(self, count, q, log):
         for i in range(0,count):
-            w = Worker(q)
+            w = Worker(q, log)
             w.start()
     def readFilesFile(self, path, q):
         with open(path) as backupListFile:
@@ -25,20 +26,16 @@ class Producer(object):
                 line = line.rstrip()
                 self.processLine(line, q)
     def processLine(self, line, q):
-        logging.debug("hi world" +line)
         # resolves wildchars in the path
         resolvedPaths = glob.glob(line)
-        logging.debug(resolvedPaths)
         for path in resolvedPaths:
             # it's a directory
             if os.path.isdir(path):
-                logging.debug("found a directory" + path)
                 # walk the direcotry passing the original path 
                 # and the queue to the walker function as a tuple
                 os.path.walk(path, self.processDir, (q, path))
             # it's just a file
             else:
-                logging.debug("found a file" + path)
                 self.putWithRetry(path, "", q)
     def processDir(self, (q,origPath), dirname, names):
         # queue and origPath unpacked frm tuple

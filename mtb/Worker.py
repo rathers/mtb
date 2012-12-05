@@ -7,12 +7,16 @@ from boto.s3.connection import S3Connection
 class Worker(threading.Thread):
     #dest = "/temp/backup_test"
     dest = ""
-    def __init__(self, q):
+    def __init__(self, q, log):
         threading.Thread.__init__(self)
         self.daemon=True
         self._q = q
+        self.log = log
     def run(self):
         #enter loop
+
+        conn = S3Connection()
+        bucket = conn.get_bucket('rathers-backup')
         while True:
             # get something off the queue i
             # (will block forever if neccessary)
@@ -41,7 +45,7 @@ class Worker(threading.Thread):
            #            pass 
            #        else: 
            #            raise
-            print '{}: Copying from {} to {}'.format(self.name, srcFile, sDestFile)
+            self.log.info('Copying from {} to {}'.format(srcFile, sDestFile))
             try:
                 #shutil.copy2(srcFile, sDestFile)
                 # rsync options explained:
@@ -53,19 +57,25 @@ class Worker(threading.Thread):
                 a=1
 
                 #call(['/usr/local/bin/s3cmd', 'put', srcFile, 's3://rathers-backup/{}'.format(sDestFile)])
-                conn = S3Connection()
-                bucket = conn.get_bucket('rathers-backup')
-                key = bucket.get_key(sDestFile)
                 fileStat = os.stat(srcFile)
                 localMTime = int(fileStat.st_mtime)
-                remoteMTime = int(key.get_metadata("mtime"))
-#                remoteSize = int(key.get_metadata("size"))
-                if  remoteMTime != localMTime:
-                    logging.debug("file changed ({}, {}), uploading {}".format(localMTime, remoteMTime, srcFile))
+                key = bucket.get_key(sDestFile)
+                upload = False
+                if key == None:
+                    key = bucket.new_key(sDestFile)
+                    upload = True
+                    self.log.info("New file!!")
+                else:
+                    remoteMTime = key.get_metadata("mtime")
+                    if  (remoteMTime != None) and (int(remoteMTime) != localMTime):
+                        upload = True
+                        self.log.info("file changed ({}, {}), uploading {}".format(localMTime, remoteMTime, srcFile))
+
+                if upload == True:
                     key.set_metadata("mtime", str(localMTime))
                     key.set_contents_from_filename(srcFile)
                 else:
-                    logging.debug("mtime does not differ for " + srcFile)
+                    self.log.info("File unchanged, skipping...")
 
             except IOError as e:
                 print '   ... Skipping: {}'.format(e)
