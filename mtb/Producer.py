@@ -2,7 +2,7 @@ import glob, threading, Queue, sys, shutil, time, os.path, logging
 from mtb.Worker import Worker
 
 class Producer(object):
-    noThreads = 10
+    noThreads = 15
     def __init__(self, q, log):
         self._q = q
         self.log = log
@@ -56,6 +56,7 @@ class Producer(object):
         while True:
             try:
                 q.put((fqPath, relDir), True, 1)
+                self.log.debug("[queue-on] " + fqPath)
                 break
             except Queue.Full:
                 a=1

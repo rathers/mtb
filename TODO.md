@@ -12,6 +12,8 @@
 
 == Bugs ==
 * Using more threads than there are files to copy resorts in the programmign terminating prematurely
+* trailing slash on the end of a directory in the files file causes the remote directory to become '.'
+* Program seems to hang at the end of a long transfer. Think it only occurs if there is an exception raised during the processing of a file even though Im handling them correctly now :-/
 
 == Performance ==
 * Calling s3cmd seperately for each file is inefficient:

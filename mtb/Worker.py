@@ -47,16 +47,6 @@ class Worker(threading.Thread):
            #            raise
             self.log.info('Copying from {} to {}'.format(srcFile, sDestFile))
             try:
-                #shutil.copy2(srcFile, sDestFile)
-                # rsync options explained:
-                #   t: preserves and check mtime of files and only transfers out of date files
-                #   l: preserves symlinks
-                #   p: preserve permissions
-                #   g: preserve group
-                #   o: preserve owner
-                a=1
-
-                #call(['/usr/local/bin/s3cmd', 'put', srcFile, 's3://rathers-backup/{}'.format(sDestFile)])
                 fileStat = os.stat(srcFile)
                 localMTime = int(fileStat.st_mtime)
                 key = bucket.get_key(sDestFile)
@@ -78,6 +68,16 @@ class Worker(threading.Thread):
                     self.log.info("File unchanged, skipping...")
 
             except IOError as e:
-                print '   ... Skipping: {}'.format(e)
+                self.log.warn('IOError, skipping {}: {}'.format(srcFile, e))
+                self._q.task_done()
+                self._q.put((srcFile, relDir))
+                continue
+            except Exception as e:
+                #assume boto exception
+                self.log.warn('Boto Error, skipping {}: {}'.format(srcFile, e))
+                self._q.task_done()
+                self._q.put((srcFile, relDir))
+                continue
+            self.log.debug("[queue-off] " + srcFile)
             self._q.task_done()
 

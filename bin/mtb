@@ -9,7 +9,7 @@ def main():
 #    cfg = parseConfig()
 #    sys.exit()
     log = logging.getLogger("mtb")
-    log.setLevel(logging.INFO)
+    log.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
 #    ch.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s - [%(threadName)s] %(levelname)s: %(message)s")
@@ -26,6 +26,7 @@ def main():
     # create N worker threads to consume the queue
     p = Producer(q, log)
     p.start()
+    log.info("Finished, shutting down...")
 
 def parseConfig():
     configFile = ".mtb"
