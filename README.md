@@ -28,6 +28,7 @@ Also this is my fist foray into python so please excuse any tardiness and anti-p
 * Download the source to somewhere on your machine
 * [Install boto](https://github.com/boto/boto#installation)
 * Create an MTB config file at ~/.mtb that contains a list of files and directories you want to backup. Each path on a separate line. For example:
+
 ```ini
     /home/rathers/music
     /home/rathers/documents/cv.doc
