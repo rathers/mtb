@@ -28,10 +28,10 @@ Also this is my fist foray into python so please excuse any tardiness and anti-p
 * Download the source to somewhere on your machine
 * [Install boto](https://github.com/boto/boto#installation)
 * Create an MTB config file at ~/.mtb that contains a list of files and directories you want to backup. Each path on a separate line. For example:
-
+[code]
     /home/rathers/music
     /home/rathers/documents/cv.doc
-
+[/code]
 * Create a boto config file in order that we can connect to your S3 bucket. [This page](http://code.google.com/p/boto/wiki/BotoConfig) explains how to do this. I have a config file at /etc/boto.cfg with the following contents:
 
 ```ini
