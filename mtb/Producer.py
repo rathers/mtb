@@ -1,8 +1,8 @@
-import glob, threading, Queue, sys, shutil, time, os.path, logging
+import glob, threading, Queue, sys, shutil, time, os.path, logging, re
 from mtb.Worker import Worker
 
 class Producer(object):
-    noThreads = 15
+    noThreads = 20
     def __init__(self, q, log):
         self._q = q
         self.log = log
@@ -24,7 +24,8 @@ class Producer(object):
             for line in backupListFile:
                 # remove trailing carriage return
                 line = line.rstrip()
-                self.processLine(line, q)
+                if re.search("^\w#", line) == None:
+                    self.processLine(line, q)
     def processLine(self, line, q):
         # resolves wildchars in the path
         resolvedPaths = glob.glob(line)

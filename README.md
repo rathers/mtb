@@ -9,7 +9,7 @@ In short MTB allows to backup to S3, fast.
 
 MTB is a simple python command line application. Simply provide it with a list of files and/or directories that you want to backup and it will take care of the rest. It is built using the python AWS library [Boto](https://github.com/boto/boto) and utilises the python threading library to implement concurrency. A Producer process searches for the files you wish to backup and adds each one as a job to a queue. Multiple Worker threads then read jobs off the queue and back up each file in turn. The modified time of the file is checked against the one held on S3 and the file is only uploaded if the time has been changed locally. In this respect it behaves like rsync.
 
-Because the process of checking modified times and uploading small files involves a lot of network wait, multiple worked can significantly speed up the process and better utilise your upstream bandwidth. The more latency in your connection to S3 the more you will benefit from multiple threads.
+Because the process of checking modified times and uploading small files involves a lot of network wait, multiple workers can significantly speed up the process and better utilise your upstream bandwidth. The more latency in your connection to S3 the more you will benefit from multiple threads.
 
 ## Status
 

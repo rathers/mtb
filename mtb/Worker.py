@@ -70,11 +70,11 @@ class Worker(threading.Thread):
             except IOError as e:
                 self.log.warn('IOError, skipping {}: {}'.format(srcFile, e))
                 self._q.task_done()
-                self._q.put((srcFile, relDir))
+                #self._q.put((srcFile, relDir))
                 continue
             except Exception as e:
                 #assume boto exception
-                self.log.warn('Boto Error, skipping {}: {}'.format(srcFile, e))
+                self.log.warn('Boto Error, skipping, but will retry {}: {}'.format(srcFile, e))
                 self._q.task_done()
                 self._q.put((srcFile, relDir))
                 continue
